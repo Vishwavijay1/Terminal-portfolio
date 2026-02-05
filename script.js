@@ -1259,7 +1259,7 @@
             "sudo commands:",
             "sudo do the harlem shake",
             "sudo spawn birds",
-            "sudo rickroll",
+            "sudo surprise",
             "sudo do a barrel roll",
             "sudo yeet",
             "sudo bonk",
@@ -1286,8 +1286,8 @@
       return;
     }
 
-    if (phrase === "rickroll") {
-      appendLine("sudo: never gonna give you up...");
+    if (phrase === "surprise") {
+      appendLine("sudo: surprise!");
       window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "_blank", "noopener");
       return;
     }
