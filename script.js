@@ -9,6 +9,7 @@
   const ADMIN_KEY = "terminalPortfolioAdminHash";
   const API_KEY = "terminalPortfolioApiBase";
   const DEFAULT_API_BASE = "https://terminal-portfolio-api.vishwavijayinisolation.workers.dev";
+  const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
 
   const createDefaultFS = () => ({
     type: "dir",
@@ -193,6 +194,8 @@
     saveFS();
   };
 
+  const isLocalHost = () => LOCAL_HOSTS.has(window.location.hostname);
+
   let fs = loadFS() || createDefaultFS();
 
   const loadApiBase = () => {
@@ -266,7 +269,7 @@
     token: null
   };
 
-  adminHash = loadAdminHash();
+  adminHash = isLocalHost() ? loadAdminHash() : null;
 
   const commandList = [
     "admin",
@@ -670,7 +673,11 @@
 
   const requireAdmin = () => {
     if (!adminState.unlocked) {
-      printError("admin: access denied (run `admin` to unlock)");
+      printError(
+        isLocalHost()
+          ? "admin: access denied (run `admin` to unlock)"
+          : "admin: access denied (run `admin login <user>` to unlock)"
+      );
       return false;
     }
     return true;
@@ -749,6 +756,7 @@
         if (hasRemote()) {
           await apiFetch("/api/admin/whoami", { authRequired: true });
         }
+        adminState.unlocked = true;
         appendLine("Remote admin authenticated.");
       } catch (error) {
         clearRemoteAuth();
@@ -830,7 +838,9 @@
         "clear                Clear the terminal output",
         "pwd                  Show current path",
         "whoami               Print the user name",
-        "admin                Enter admin mode (hidden passphrase)"
+        isLocalHost()
+          ? "admin                Enter admin mode (hidden passphrase)"
+          : "admin                Enter admin mode (backend login)"
       ];
 
       const tips = [
@@ -840,27 +850,35 @@
       ];
 
       if (adminState.unlocked) {
+        const adminLines = [
+          "Admin commands:",
+          "mkdir <dir>          Create a directory",
+          "touch <file>         Create an empty file",
+          "write <file> <text>  Overwrite a file with text",
+          "link <file> <url>    Create or update a link",
+          "rm <file>            Remove a file or link",
+          "rmdir <dir>          Remove an empty directory",
+          "mkproject <name>     Create a project folder scaffold",
+          "admin login <user>   Login for remote sync",
+          "admin logout         Clear remote login",
+          "admin api [set|clear] Configure API base URL",
+          "admin pull           Pull filesystem from backend",
+          "admin save [note]    Save filesystem to backend",
+          "admin history        List recent backend versions",
+          "admin rollback <id>  Roll back to a version",
+          "admin export         Print current filesystem as JSON",
+          "admin reset          Reset filesystem to defaults"
+        ];
+
+        if (isLocalHost()) {
+          adminLines.push("admin set            Create or change local passphrase");
+        }
+
         appendBlock(
           [
             ...base,
             "",
-            "Admin commands:",
-            "mkdir <dir>          Create a directory",
-            "touch <file>         Create an empty file",
-            "write <file> <text>  Overwrite a file with text",
-            "link <file> <url>    Create or update a link",
-            "rm <file>            Remove a file or link",
-            "rmdir <dir>          Remove an empty directory",
-            "mkproject <name>     Create a project folder scaffold",
-            "admin login <user>   Login for remote sync",
-            "admin logout         Clear remote login",
-            "admin api [set|clear] Configure API base URL",
-            "admin pull           Pull filesystem from backend",
-            "admin save [note]    Save filesystem to backend",
-            "admin history        List recent backend versions",
-            "admin rollback <id>  Roll back to a version",
-            "admin export         Print current filesystem as JSON",
-            "admin reset          Reset filesystem to defaults",
+            ...adminLines,
             "",
             ...tips
           ].join("\n")
@@ -872,7 +890,9 @@
         [
           ...base,
           "",
-          "Admin mode unlocks extra commands. Run `admin` to unlock.",
+          isLocalHost()
+            ? "Admin mode unlocks extra commands. Run `admin` to unlock."
+            : "Admin mode unlocks extra commands. Run `admin login <user>` to unlock.",
           "",
           ...tips
         ].join("\n")
@@ -883,30 +903,37 @@
       const action = (args[0] || "").toLowerCase();
 
       if (action === "help") {
-        appendBlock(
-          [
-            "Admin commands:",
-            "admin                Unlock admin mode",
-            "admin set            Create or change passphrase",
-            "admin off            Disable admin mode",
-            "admin status         Show admin status",
-            "admin login <user>   Login for remote sync",
-            "admin logout         Clear remote login",
-            "admin api [set|clear] Configure API base URL",
-            "admin pull           Pull filesystem from backend",
-            "admin save [note]    Save filesystem to backend",
-            "admin history        List recent backend versions",
-            "admin rollback <id>  Roll back to a version",
-            "admin export         Print filesystem JSON",
-            "admin reset          Reset filesystem to defaults"
-          ].join("\n")
-        );
+        const lines = [
+          "Admin commands:",
+          "admin                Unlock admin mode",
+          "admin off            Disable admin mode",
+          "admin status         Show admin status",
+          "admin login <user>   Login for remote sync",
+          "admin logout         Clear remote login",
+          "admin api [set|clear] Configure API base URL",
+          "admin pull           Pull filesystem from backend",
+          "admin save [note]    Save filesystem to backend",
+          "admin history        List recent backend versions",
+          "admin rollback <id>  Roll back to a version",
+          "admin export         Print filesystem JSON",
+          "admin reset          Reset filesystem to defaults"
+        ];
+        if (isLocalHost()) {
+          lines.splice(2, 0, "admin set            Create or change local passphrase");
+        }
+        appendBlock(lines.join("\n"));
         return;
       }
 
       if (action === "status") {
         appendLine(adminState.unlocked ? "Admin mode: ON" : "Admin mode: OFF");
-        appendLine(adminHash ? "Passphrase: set" : "Passphrase: not set");
+        appendLine(
+          isLocalHost()
+            ? adminHash
+              ? "Passphrase: set"
+              : "Passphrase: not set"
+            : "Local passphrase: disabled"
+        );
         appendLine(
           hasRemote()
             ? `API base: ${getApiBase()}`
@@ -922,12 +949,14 @@
 
       if (action === "off") {
         adminState.unlocked = false;
+        clearRemoteAuth();
         appendLine("Admin mode disabled.");
         return;
       }
 
       if (action === "logout") {
         clearRemoteAuth();
+        adminState.unlocked = false;
         appendLine("Remote login cleared.");
         return;
       }
@@ -955,7 +984,6 @@
       }
 
       if (action === "login") {
-        if (!requireAdmin()) return;
         if (!hasRemote()) {
           printError("admin login: API base not set");
           return;
@@ -1085,6 +1113,10 @@
       }
 
       if (action === "set") {
+        if (!isLocalHost()) {
+          printError("admin: local passphrase disabled on production");
+          return;
+        }
         if (adminHash && !adminState.unlocked) {
           printError("admin: unlock first to change passphrase");
           return;
@@ -1098,7 +1130,11 @@
       }
 
       if (!adminHash) {
-        appendLine("No admin passphrase set. Run `admin set` to create one.");
+        appendLine(
+          isLocalHost()
+            ? "No admin passphrase set. Run `admin set` to create one."
+            : "Run `admin login <user>` to unlock admin mode."
+        );
         return;
       }
 
