@@ -1,0 +1,12 @@
+name = "terminal-portfolio-api"
+main = "src/index.js"
+compatibility_date = "2026-02-05"
+
+[vars]
+ADMIN_USER = "admin"
+ALLOWED_ORIGINS = "http://localhost:5173"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "terminal_portfolio"
+database_id = "f0c4c1b5-0ac7-4948-9c3b-35a4743605a0"

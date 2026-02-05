@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vishwavijay | Terminal Portfolio</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <main class="page">
+      <section class="terminal" aria-label="Terminal">
+        <header class="terminal__bar">
+          <div class="traffic">
+            <button
+              class="dot dot--red"
+              type="button"
+              id="close-btn"
+              aria-label="Close"
+            ></button>
+            <button
+              class="dot dot--yellow"
+              type="button"
+              id="minimize-btn"
+              aria-label="Minimize"
+            ></button>
+            <button
+              class="dot dot--green"
+              type="button"
+              id="maximize-btn"
+              aria-label="Maximize"
+            ></button>
+          </div>
+          <div class="terminal__title" id="terminal-title">vishwavijay@portfolio:~</div>
+        </header>
+        <div class="ants" id="ants-layer" aria-hidden="true"></div>
+
+        <div class="terminal__body" id="terminal-body">
+          <div class="terminal__output" id="terminal-output">
+            <div class="line">welcome to vishwavijay's portfolio terminal</div>
+            <div class="line">type 'help' to list commands</div>
+            <div class="line">hint: try 'ls' or 'cd projects'</div>
+          </div>
+
+          <div class="prompt" id="prompt-line">
+            <label class="prompt__label" id="prompt-label" for="prompt-input">
+              vishwavijay@portfolio:~$
+            </label>
+            <input
+              id="prompt-input"
+              class="prompt__input"
+              type="text"
+              spellcheck="false"
+              autocomplete="off"
+              autocapitalize="off"
+              aria-label="Terminal input"
+            />
+          </div>
+          <div
+            class="prompt__suggestions is-hidden"
+            id="prompt-suggestions"
+            aria-live="polite"
+          ></div>
+        </div>
+      </section>
+    </main>
+    <div class="fire-overlay" id="fire-overlay" aria-hidden="true"></div>
+    <div class="birds" id="birds-layer" aria-hidden="true"></div>
+  </body>
+</html>
