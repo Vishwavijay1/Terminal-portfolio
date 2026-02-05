@@ -8,7 +8,7 @@
   const STORAGE_KEY = "terminalPortfolioFS";
   const ADMIN_KEY = "terminalPortfolioAdminHash";
   const API_KEY = "terminalPortfolioApiBase";
-  const DEFAULT_API_BASE = "https://terminal-portfolio-api.vishwavijayinolation.workers.dev";
+  const DEFAULT_API_BASE = "https://terminal-portfolio-api.vishwavijayinisolation.workers.dev";
 
   const createDefaultFS = () => ({
     type: "dir",
