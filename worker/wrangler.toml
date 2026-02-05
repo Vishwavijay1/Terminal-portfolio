@@ -4,7 +4,7 @@ compatibility_date = "2026-02-05"
 
 [vars]
 ADMIN_USER = "admin"
-ALLOWED_ORIGINS = "http://localhost:5173"
+ALLOWED_ORIGINS = "http://localhost:5173,https://terminal-portfolio-lovat.vercel.app,https://terminal-portfolio-git-main-vishwavijays-projects-944014b8.vercel.app,https://terminal-portfolio-6gyh3gg49-vishwavijays-projects-944014b8.vercel.app"
 
 [[d1_databases]]
 binding = "DB"
